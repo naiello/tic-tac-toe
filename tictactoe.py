@@ -55,7 +55,7 @@ def winner(board):
 	x_win = X_PLYR * 3    # 'xxx'
 	o_win = O_PLYR * 3    # 'ooo'
 
-	for combo in win_combo:
+	for combo in win_combos:
 		seq = board[combo[0]] + board[combo[1]] + board[combo[2]]
 		if seq == x_win:
 			return X_PLYR
@@ -90,9 +90,9 @@ def main():
 	""" Entry point for the application """
 	# Create a blank board, initialize game state
 	board = [N_PLYR] * 9
-	moves = 0
-	is_human = [X_PLYR: True, O_PLYR: True]
-	next_player = [X_PLYR: O_PLYR, O_PLYR: X_PLYR]
+	moves = 1 
+	is_human = {X_PLYR: True, O_PLYR: True}
+	next_player = {X_PLYR: O_PLYR, O_PLYR: X_PLYR}
 	current_player = X_PLYR
 
 	# Start gameplay
@@ -106,7 +106,12 @@ def main():
 			get_agent_move(board, current_player)
 		moves += 1
 		board_util = utility(board)
+		if current_player == X_PLYR:
+			current_player = O_PLYR
+		else:
+			current_player = X_PLYR
 
+	print_board(board)
 	# Game's over, who won?
 	print ["Player 2 has won.", "The game is a tie.", "Player 1 has won."][board_util + 1]
 	return
