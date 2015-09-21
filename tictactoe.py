@@ -1,6 +1,11 @@
 #! /usr/bin/env python
 
 import sys
+import math
+import random
+
+# X_PLYR - X - Player 1 - MAX
+# O_PLYR - O - Player 2 - MIN
 
 O_PLYR = "O"
 X_PLYR = "X"
@@ -12,6 +17,7 @@ def get_human_move(board, player):
 	""" Asks the human player to make the next move """
 
 	move = -1
+	legal_moves = actions(board)
 
 	# Prompt for a move until the player enters a valid one
 	while True:
@@ -19,7 +25,10 @@ def get_human_move(board, player):
 		try:
 			move = int(raw_input()) - 1
 			if move in range(0, 9):
-				break
+				if move in legal_moves:
+					break
+				else:
+					print "illegal move!"
 			else:
 				print "must enter a value in the range [1, 9]!"
 		except ValueError:
@@ -32,19 +41,66 @@ def get_human_move(board, player):
 
 def get_agent_move(board, player):
 	""" Asks the AI to determine the next move """
+	moves = {}
+	if player == X_PLYR:
+		best = max_value(board, float("-inf"), float("inf"), moves)
+	else:
+		best = min_value(board, float("-inf"), float("inf"), moves)
 
-def minimax_value(board, player, alpha, beta):
-	""" Recursively search the game tree for the best move for
-	the specified player """
+	best_moves = [m for m in moves.keys() if moves[m] == best]
+	#print best
+	#print moves
+	#print best_moves
+	move = best_moves[0]
+	print "enter move for player " + str(PLAYER_ID[player]) + ": " + str(move + 1)
+	board[move] = player
+
+
+def max_value(board, alpha, beta, moves):
+	""" Returns the minimax value for a given max node """
+	util = utility(board)
+	if util is not None:
+		return util
+
+	val = float("-inf")
+	for a in actions(board):
+		next = min_value(place_token(board, a, X_PLYR), alpha, beta, None)
+		if isinstance(moves, dict):
+			moves[a] = next
+
+		val = max(val, next)
+	#	if val >= beta:
+	#		return val
+		alpha = max(alpha, val)
+	return val
+
+def min_value(board, alpha, beta, moves):
+	""" Returns the minimax value for a given min node """
+	util = utility(board)
+	if util is not None:
+		return util
+
+	val = float("inf")
+	for a in actions(board):
+		next = max_value(place_token(board, a, O_PLYR), alpha, beta, None)
+		if isinstance(moves, dict):
+			moves[a] = next
+
+		val = min(val, next)
+	#	if val <= alpha:
+	#		return val
+		beta = min(beta, val)
+	return val
+
+def place_token(board, move, player):
+	""" Returns a copy of the board with an additional token placed """
+	board_cpy = board[:]
+	board_cpy[move] = player
+	return board_cpy
 
 def actions(board):
 	""" Returns a list of all open board positions """
-	moves = [];
-	for i in xrange(0, 9):
-		if board[i] == N_PLYR:
-			moves.append(i)
-
-	return moves 
+	return [i for i in xrange(0, 9) if board[i] == N_PLYR];
 
 def winner(board):
 	""" Returns O_PLYR, X_PLYR, or N_PLYR """
@@ -91,7 +147,7 @@ def main():
 	# Create a blank board, initialize game state
 	board = [N_PLYR] * 9
 	moves = 1 
-	is_human = {X_PLYR: True, O_PLYR: True}
+	is_human = {X_PLYR: True, O_PLYR: False}
 	next_player = {X_PLYR: O_PLYR, O_PLYR: X_PLYR}
 	current_player = X_PLYR
 
@@ -106,10 +162,7 @@ def main():
 			get_agent_move(board, current_player)
 		moves += 1
 		board_util = utility(board)
-		if current_player == X_PLYR:
-			current_player = O_PLYR
-		else:
-			current_player = X_PLYR
+		current_player = next_player[current_player]
 
 	print_board(board)
 	# Game's over, who won?
