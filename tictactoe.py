@@ -51,7 +51,7 @@ def get_agent_move(board, player):
 	#print best
 	#print moves
 	#print best_moves
-	move = best_moves[0]
+	move = best_moves[random.randint(0, len(best_moves) - 1)]
 	print "enter move for player " + str(PLAYER_ID[player]) + ": " + str(move + 1)
 	board[move] = player
 
@@ -65,12 +65,14 @@ def max_value(board, alpha, beta, moves):
 	val = float("-inf")
 	for a in actions(board):
 		next = min_value(place_token(board, a, X_PLYR), alpha, beta, None)
+
 		if isinstance(moves, dict):
 			moves[a] = next
 
 		val = max(val, next)
-	#	if val >= beta:
-	#		return val
+
+		#if val >= beta:
+		#	return val
 		alpha = max(alpha, val)
 	return val
 
@@ -83,12 +85,15 @@ def min_value(board, alpha, beta, moves):
 	val = float("inf")
 	for a in actions(board):
 		next = max_value(place_token(board, a, O_PLYR), alpha, beta, None)
+
 		if isinstance(moves, dict):
 			moves[a] = next
 
 		val = min(val, next)
-	#	if val <= alpha:
-	#		return val
+
+		#if val <= alpha:
+		#	return val
+
 		beta = min(beta, val)
 	return val
 
@@ -145,9 +150,16 @@ def print_board(board):
 def main():
 	""" Entry point for the application """
 	# Create a blank board, initialize game state
+	print "Enter number of AI players:",
+	n_ai = int(raw_input())
+	while n_ai != 2 and n_ai != 1:
+		print "illegal input"
+		print "Enter number of AI players:",
+		n_ai = int(raw_input())
+
 	board = [N_PLYR] * 9
 	moves = 1 
-	is_human = {X_PLYR: True, O_PLYR: False}
+	is_human = {X_PLYR: (n_ai == 1), O_PLYR: False}
 	next_player = {X_PLYR: O_PLYR, O_PLYR: X_PLYR}
 	current_player = X_PLYR
 
@@ -155,7 +167,7 @@ def main():
 	board_util = None
 	while board_util == None:
 		print_board(board)
-		print "Move " + str(moves) + ": "
+		print "Move " + str(moves) + ":",
 		if is_human[current_player]:
 			get_human_move(board, current_player)
 		else:
@@ -167,7 +179,7 @@ def main():
 	print_board(board)
 	# Game's over, who won?
 	print ["Player 2 has won.", "The game is a tie.", "Player 1 has won."][board_util + 1]
-	return
+	return 0
 		
 
 if __name__ == "__main__":
